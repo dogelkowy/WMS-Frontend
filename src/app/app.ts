@@ -1,12 +1,30 @@
-import { Component, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { ChangeDetectorRef, Component, inject } from '@angular/core';
+import { ProductService } from './products/product.service';
+import { Product } from './products/product';
 
 @Component({
-  imports: [RouterOutlet],
   selector: 'app-root',
-  styleUrl: './app.css',
-  templateUrl: './app.html',
+  templateUrl: './app.html'
 })
 export class App {
-  protected readonly title = signal('WMS-Frontend');
+  private productService = inject(ProductService);
+  private changeDetector = inject(ChangeDetectorRef);
+
+  products: Product[] = [];
+
+  constructor() {
+    this.productService.getProducts().subscribe({
+      next: products => {
+        console.log('API ZWRÓCIŁO:', products);
+        console.log('ILE:', products.length);
+
+        this.products = products;
+
+        this.changeDetector.detectChanges();
+      },
+      error: error => {
+        console.error('BŁĄD:', error);
+      }
+    });
+  }
 }
